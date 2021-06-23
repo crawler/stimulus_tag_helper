@@ -99,6 +99,8 @@ Became:
 
 ### Nested controllers
 
+Almost random peace of code from my app 
+
 ```slim
 = stimulus_controller( \
     "flash", tag: "div", class: "flash flash_global", values: { "page-cached" => page_will_be_cached?, src: flash_path },
