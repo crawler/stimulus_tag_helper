@@ -40,7 +40,7 @@ task :verify_gemspec_files do
     not, you may need to delete these files or modify the gemspec to ensure
     that they are not included in the gem by mistake:
 
-    #{ignored_by_git.join("\n").gsub(/^/, '  ')}
+    #{ignored_by_git.join("\n").gsub(/^/, "  ")}
 
   ERROR
 end
@@ -108,11 +108,12 @@ module RubyVersions
     end
 
     private
-      def versions
-        @_versions ||= begin
-          yaml = URI.open("https://raw.githubusercontent.com/ruby/www.ruby-lang.org/HEAD/_data/downloads.yml")
-          YAML.safe_load(yaml, symbolize_names: true)
-        end
+
+    def versions
+      @_versions ||= begin
+        yaml = URI.open("https://raw.githubusercontent.com/ruby/www.ruby-lang.org/HEAD/_data/downloads.yml")
+        YAML.safe_load(yaml, symbolize_names: true)
       end
+    end
   end
 end

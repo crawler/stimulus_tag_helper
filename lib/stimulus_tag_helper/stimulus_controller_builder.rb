@@ -25,7 +25,7 @@ module StimulusTagHelper
     end
 
     def attributes(props)
-      { data: @template.stimulus_properties(@identifier, props) }
+      {data: @template.stimulus_properties(@identifier, props)}
     end
   end
 end

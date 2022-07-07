@@ -10,7 +10,7 @@ module StimulusTagHelper
   end
 
   def self.aliases_map
-    { values: :value, classes: :class, actions: :action }
+    {values: :value, classes: :class, actions: :action}
   end
 
   def self.alias_properties
@@ -65,10 +65,10 @@ module StimulusTagHelper
   end
 
   def stimulus_controllers_property(*identifiers)
-    { controller: Array.wrap(identifiers).join(" ") }
+    {controller: Array.wrap(identifiers).join(" ")}
   end
 
-  alias stimulus_controller_property stimulus_controllers_property
+  alias_method :stimulus_controller_property, :stimulus_controllers_property
 
   def stimulus_values_properties(identifier, **values)
     {}.tap do |properties|
@@ -78,7 +78,7 @@ module StimulusTagHelper
     end
   end
 
-  alias stimulus_value_property stimulus_values_properties
+  alias_method :stimulus_value_property, :stimulus_values_properties
 
   def stimulus_classes_properties(identifier, **classes)
     {}.tap do |properties|
@@ -88,7 +88,7 @@ module StimulusTagHelper
     end
   end
 
-  alias stimulus_class_property stimulus_classes_properties
+  alias_method :stimulus_class_property, :stimulus_classes_properties
 
   def stimulus_targets_properties(identifier, *targets)
     {}.tap do |properties|
@@ -99,7 +99,7 @@ module StimulusTagHelper
   end
 
   def stimulus_target_property(identifier, name)
-    { "#{identifier}-target" => name }
+    {"#{identifier}-target" => name}
   end
 
   def stimulus_actions_properties(identifier, *actions_params)
@@ -108,7 +108,7 @@ module StimulusTagHelper
     }
   end
 
-  alias stimulus_action_property stimulus_actions_properties
+  alias_method :stimulus_action_property, :stimulus_actions_properties
 
   def stimulus_action_value(identifier, action_params_or_action_str)
     if action_params_or_action_str.is_a?(String)
@@ -129,6 +129,6 @@ module StimulusTagHelper
   end
 
   def stimulus_attribute(...)
-    { data: stimulus_properties(...) }
+    {data: stimulus_properties(...)}
   end
 end

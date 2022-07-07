@@ -3,9 +3,9 @@
 module StimulusTagHelper
   class StimulusAction
     STANDARD_PARSER =
-      /^(?<void>(?<event>.+?)(?<void>@(?<target>window|document))?->)?(?<identifier>.+?)(?<void>#(?<method>[^:]+?))(?<void>:(?<options>.+))?$/.freeze
+      /^(?<void>(?<event>.+?)(?<void>@(?<target>window|document))?->)?(?<identifier>.+?)(?<void>#(?<method>[^:]+?))(?<void>:(?<options>.+))?$/
     NO_CONTROLLER_PARSER =
-      /^(?<void>(?<event>.+?)?(?<void>@(?<target>window|document))?->)?(?<method>[^#:]+?)(?<void>:(?<options>.+))?$/.freeze
+      /^(?<void>(?<event>.+?)?(?<void>@(?<target>window|document))?->)?(?<method>[^#:]+?)(?<void>:(?<options>.+))?$/
     class_attribute :parts, default: %i[identifier method event target options]
     attr_reader(*parts)
 
@@ -25,7 +25,7 @@ module StimulusTagHelper
     end
 
     def to_s
-      "#{event_part.presence&.+'->'}#{handler_part}".html_safe
+      "#{event_part.presence&.+"->"}#{handler_part}".html_safe
     end
 
     def self.parse(str)
