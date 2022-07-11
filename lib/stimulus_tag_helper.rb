@@ -1,20 +1,25 @@
 # frozen_string_literal: true
 
-module StimulusTagHelper
-  autoload :VERSION, "stimulus_tag_helper/version"
-  autoload :StimulusAction, "stimulus_tag_helper/stimulus_action"
-  autoload :StimulusControllerBuilder, "stimulus_tag_helper/stimulus_controller_builder"
+require "active_support/all"
+require "zeitwerk"
+Zeitwerk::Loader.for_gem.setup
 
+module StimulusTagHelper
   def self.base_properties
-    %i[controller values classes targets target actions]
+    %i[controller values classes targets target actions].freeze
   end
 
-  def self.aliases_map
-    {values: :value, classes: :class, actions: :action}
+  def self.aliases
+    {controller: :controllers, value: :values, class: :classes, target: :targets, action: :actions}.freeze
+  end
+
+  def self.methods_map
+    {controllers: :stimulus_controllers_property, values: :stimulus_values_properties,
+     classes: :stimulus_classes_properties, targets: :stimulus_targets_properties, actions: :stimulus_actions_property}.freeze
   end
 
   def self.alias_properties
-    @alias_properties ||= aliases_map.values
+    @alias_properties ||= aliases.keys
   end
 
   def self.property_names
@@ -22,11 +27,11 @@ module StimulusTagHelper
   end
 
   def self.prevent_duplicates(properties_set, name)
-    alias_name = StimulusTagHelper.aliases_map[name]
+    alias_name = StimulusTagHelper.aliases[name]
     return unless alias_name && (properties_set[alias_name])
 
     raise(ArgumentError, <<~STRING)
-      "#{name} and #{alias_name} can't be passed at same time"
+      "#{name} and #{alias_name} should not be passed at the same time"
     STRING
   end
 
@@ -42,33 +47,60 @@ module StimulusTagHelper
     end
   end
 
-  def stimulus_controller_tag(identifier, tag:, data: {}, **args, &block)
-    data.merge!(stimulus_controllers_property(identifier))
-    # class option goes to the tag
-    data.merge!(stimulus_properties(identifier, args.extract!(*StimulusTagHelper.property_names - %i[class])))
+  # controller arg is used to add additional stimulus controllers to the element
+  def stimulus_controller_tag(identifier, tag:, data: {}, controller: nil, **args, &block)
+    # class class interpreted as class attribute, not a stimulus class
+    # what about value and action action? maybe here should be warning
+
+    # maybe data should be merged in args?
+    data.merge!(stimulus_properties(
+      identifier,
+      controller: data[:controller] || controller, # nil is allowed, because the args will be prepended by the identifier
+      **args.extract!(*StimulusTagHelper.property_names - %i[class])
+    ))
     tag_builder.tag_string(tag, **args.merge(data: data), &block)
   end
 
-  def stimulus_properties(identifier, props)
+  # Does not includes the controller attribute
+  def stimulus_attributes(...)
+    {data: stimulus_properties(...)}
+  end
+
+  alias_method :stimulus_attribute, :stimulus_attributes
+
+  # Does not includes the controller property
+  def stimulus_properties(identifier, **props)
     {}.tap do |data|
       StimulusTagHelper.property_names.each do |name|
-        next unless props[name]
+        next unless props.key?(name)
 
-        params = Array.wrap(props[name]).unshift(identifier)
-        kwparams = params.last.is_a?(Hash) ? params.pop : {}
+        args = Array.wrap(props[name]).unshift(identifier)
+        kwargs = args.last.is_a?(Hash) ? args.pop : {}
         StimulusTagHelper.prevent_duplicates(props, name)
-        name = name.to_s
-        property = name.pluralize == name ? "properties" : "property"
-        data.merge!(public_send("stimulus_#{name}_#{property}", *params, **kwparams))
+        data.merge!(
+          public_send(StimulusTagHelper.methods_map[StimulusTagHelper.aliases[name] || name], *args, **kwargs)
+        )
       end
     end
   end
 
+  def stimulus_controllers_attribute(...)
+    {data: stimulus_controllers_properties(...)}
+  end
+
+  alias_method :stimulus_controller_attribute, :stimulus_controllers_attribute
+
   def stimulus_controllers_property(*identifiers)
-    {controller: Array.wrap(identifiers).join(" ")}
+    {controller: Array.wrap(identifiers).compact.join(" ")}
   end
 
   alias_method :stimulus_controller_property, :stimulus_controllers_property
+
+  def stimulus_values_attributes(...)
+    {data: stimulus_values_properties(...)}
+  end
+
+  alias_method :stimulus_value_attribute, :stimulus_values_attributes
 
   def stimulus_values_properties(identifier, **values)
     {}.tap do |properties|
@@ -80,6 +112,12 @@ module StimulusTagHelper
 
   alias_method :stimulus_value_property, :stimulus_values_properties
 
+  def stimulus_classes_attributes(...)
+    {data: stimulus_classes_properties(...)}
+  end
+
+  alias_method :stimulus_class_attribute, :stimulus_classes_attributes
+
   def stimulus_classes_properties(identifier, **classes)
     {}.tap do |properties|
       classes.each_pair do |name, value|
@@ -90,45 +128,31 @@ module StimulusTagHelper
 
   alias_method :stimulus_class_property, :stimulus_classes_properties
 
+  def stimulus_targets_attributes(...)
+    {data: stimulus_targets_properties(...)}
+  end
+
+  alias_method :stimulus_target_attribute, :stimulus_targets_attributes
+
   def stimulus_targets_properties(identifier, *targets)
-    {}.tap do |properties|
-      targets.each do |target|
-        properties.merge!(stimulus_target_property(identifier, target))
-      end
-    end
+    {"#{identifier}-target" => targets.join(" ")}
   end
 
-  def stimulus_target_property(identifier, name)
-    {"#{identifier}-target" => name}
-  end
+  alias_method :stimulus_target_property, :stimulus_targets_properties
 
-  def stimulus_actions_properties(identifier, *actions_params)
+  def stimulus_actions_property(identifier, *actions_params)
     {
-      "action" => actions_params.map { |action_params| stimulus_action_value(identifier, action_params) }.join(" ")
+      action: actions_params.map { |action_params| stimulus_action_value(identifier, action_params) }.join(" ").html_safe
     }
   end
 
-  alias_method :stimulus_action_property, :stimulus_actions_properties
+  alias_method :stimulus_action_property, :stimulus_actions_property
 
-  def stimulus_action_value(identifier, action_params_or_action_str)
-    if action_params_or_action_str.is_a?(String)
-      action_params_or_action_str = StimulusAction.parse(action_params_or_action_str)
-    end
+  def stimulus_action_value(identifier, args_or_string) # :nodoc:
+    return StimulusAction.parse(args_or_string, identifier: identifier) if args_or_string.is_a?(String)
 
-    StimulusAction.new(identifier: identifier, **action_params_or_action_str).to_s
-  end
-
-  property_names.each do |name|
-    name = name.to_s
-    attribute, property = name.pluralize == name ? %w[attributes properties] : %w[attribute property]
-    class_eval <<-RUBY, __FILE__, __LINE__ + 1
-      def stimulus_#{name}_#{attribute}(...)        # def stimulus_value_attribute(...)
-        { data: stimulus_#{name}_#{property}(...) } #   { data: stimulus_value_property(...) }
-      end                                           # end
-    RUBY
-  end
-
-  def stimulus_attribute(...)
-    {data: stimulus_properties(...)}
+    # WARNING: this is unsafe for public use by unexpired developers.
+    # TODO: find a elegant way to escape -> splitter escaping &gt; back and forth.
+    StimulusAction.new(identifier: identifier, **args_or_string).to_s.html_safe
   end
 end

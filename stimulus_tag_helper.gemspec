@@ -24,4 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rails", ">= 6.0.0"
+  # already there, but i feel uncomfortable to require in without specifing it here
+  spec.add_dependency "activesupport", ">= 6.0.0"
+  spec.add_dependency "zeitwerk", ">= 2.5.0"
 end
