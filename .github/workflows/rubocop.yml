@@ -14,18 +14,14 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
     env:
-      BUNDLE_JOBS: 4
-      BUNDLE_RETRY: 3
-    strategy:
-      matrix:
-        ruby-version: ['3.1']
+      BUNDLE_WITHOUT: really_development
 
     steps:
     - uses: actions/checkout@v3
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: ${{ matrix.ruby-version }}
+        ruby-version: 3.1
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Run tests and the rubocop inspection
-      run: bx rake rubocop
+    - name: Rubocop inspection
+      run: bundle exec rake rubocop

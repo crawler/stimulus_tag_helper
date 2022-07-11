@@ -1,0 +1,33 @@
+name: Ruby
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches: [ $default-branch ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: ['2.7', '3.0', '3.1']
+        gemfile: [ Gemfile, 'gemfiles/rails-6-0-x.gemfile', 'gemfiles/rails-6-1-x.gemfile', 'gemfiles/rails-edge.gemfile' ]
+    # runs-on: ${{ matrix.os }}
+    env:
+      BUNDLE_WITHOUT: "really_development:linting"
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Run tests
+        run: bundle exec rake test

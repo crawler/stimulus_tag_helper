@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "rails", "~> 6.1.0"
+gem "zeitwerk"
+gem "minitest"
+gem "minitest-ci"
+gem "minitest-reporters"
+gem "rake"

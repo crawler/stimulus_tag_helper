@@ -2,7 +2,13 @@
 
 require "bundler/gem_tasks"
 require "rake/testtask"
-require "rubocop/rake_task"
+
+begin
+  require "rubocop/rake_task"
+  RuboCop::RakeTask.new
+rescue LoadError
+  puts("rubocop rake task was not created")
+end
 
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
@@ -10,9 +16,7 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/**/*_test.rb"]
 end
 
-RuboCop::RakeTask.new
-
-task default: %i[test rubocop]
+task default: %i[test]
 
 # == "rake release" enhancements ==============================================
 
