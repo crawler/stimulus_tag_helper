@@ -6,15 +6,26 @@ module StimulusTagHelper
       /^(?<void>(?<event>.+?)(?<void>@(?<target>window|document))?->)?(?<identifier>.+?)(?<void>#(?<method>[^:]+?))(?<void>:(?<options>.+))?$/
     NO_CONTROLLER_PARSER =
       /^(?<void>(?<event>.+?)?(?<void>@(?<target>window|document))?->)?(?<method>[^#:]+?)(?<void>:(?<options>.+))?$/
-    class_attribute :parts, default: %i[identifier method event target options]
-    attr_reader(*parts)
+    PARTS = %i[identifier method event target options]
 
-    # event is nil to let stimulusjs decide default event for the element
+    # event is nil to let stimulus.js decide default event for the element
     def initialize(identifier:, method:, event: nil, target: nil, options: nil)
-      parts.each do |part|
+      PARTS.each do |part|
         instance_variable_set(:"@#{part}", binding.local_variable_get(part))
       end
     end
+
+    def to_s
+      "#{event_part.presence&.+("->")}#{handler_part}"
+    end
+
+    def ==(other)
+      other.is_a?(StimulusAction) && other.to_s == to_s
+    end
+
+    private
+
+    attr_reader(*PARTS) # define attr readers for each part
 
     def event_part
       "#{event}#{"@#{target}" if target}"
@@ -24,16 +35,15 @@ module StimulusTagHelper
       "#{identifier}##{method}#{":#{options}" if options}"
     end
 
-    def to_s
-      "#{event_part.presence&.+"->"}#{handler_part}".html_safe
-    end
+    class << self
+      def parse(string, **defaults)
+        to_parse = string.to_s
+        parsed =
+          to_parse.include?("#") ? STANDARD_PARSER.match(to_parse) : NO_CONTROLLER_PARSER.match(to_parse)
+        raise(ArgumentError, "Can't parse stimulus action #{string.inspect}") unless parsed
 
-    def self.parse(str)
-      parsed =
-        str.include?("#") ? STANDARD_PARSER.match(str) : NO_CONTROLLER_PARSER.match(str)
-      raise(ArgumentError, "can't parse action string #{str}") unless parsed
-
-      parsed.named_captures.except("void").symbolize_keys
+        new(**defaults.merge(parsed.named_captures.except("void").transform_keys(&:to_sym)))
+      end
     end
   end
 end
