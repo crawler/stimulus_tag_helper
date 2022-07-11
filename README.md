@@ -1,7 +1,8 @@
 # stimulus_tag_helper
 
-[![Rubocop](https://github.com/crawler/stimulus_tag_helper/workflows/Rubocop/badge.svg)](https://github.com/crawler/stimulus_tag_helper/actions)
-
+[![Rubocop](https://github.com/crawler/stimulus_tag_helper/actions/workflows/rubocop.yml/badge.svg)](https://github.com/crawler/stimulus_tag_helper/actions)
+[![Tests](https://github.com/crawler/stimulus_tag_helper/actions/workflows/ruby.yml/badge.svg)](https://github.com/crawler/stimulus_tag_helper/actions)
+[![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 [![Gem](https://img.shields.io/gem/v/stimulus_tag_helper.svg)](https://rubygems.org/gems/stimulus_tag_helper)
 
 ## WARING!
