@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stimulus_tag_helper (0.1.0)
+    stimulus_tag_helper (0.2.0)
       activesupport (>= 6.0.0)
       rails (>= 6.0.0)
       zeitwerk (>= 2.5.0)

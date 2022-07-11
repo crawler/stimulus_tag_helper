@@ -18,14 +18,14 @@ module StimulusTagHelper
 
         alias #{name} #{name}_#{attribute} # alias value value_attribute
 
-        def #{name}_#{property}(*args, **kws)                                        # def value_property(*args, **kws)
-          @template.stimulus_#{name}_#{property}(*args.unshift(@identifier), **kws)  #   stimulus_value_property(@identifier, *args, **kws)
-        end                                                                          # end
+        def #{name}_#{property}(*args, **kwargs)                                        # def value_property(*args, **kwargs)
+          @template.stimulus_#{name}_#{property}(*args.unshift(@identifier), **kwargs)  #   stimulus_value_property(@identifier, *args, **kwargs)
+        end                                                                             # end
       RUBY
     end
 
-    def attributes(props)
-      {data: @template.stimulus_properties(@identifier, props)}
+    def attributes(**attributes)
+      @template.stimulus_attributes(@identifier, **attributes)
     end
   end
 end
