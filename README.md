@@ -12,7 +12,7 @@ This gem is in the proof of concept stage. I made it for myself, and it is not y
 
 The stimulusjs is a great js framework for the HTML that you already have, but once u start using it the HTML becomes pretty big as you need to extend it with the attributes that your required to tight it with controllers. So I made this modest (even more modest than the stimulus itself) helper. Currently, I use it with the Slim(http://slim-lang.com/). So for now examples will be in it.
 
-The Builder keeps the controller name and then adds it automatically where it is needed to match nesting and Stimulus 2.0 requirements. 
+The Builder keeps the controller name and then adds it automatically where it is needed to match nesting and Stimulus 2.0 requirements.
 So You can mix attributes of a couple of controllers on a single element or element helper. In the end, the helpers are returning simple Hash.
 
 ---
@@ -27,10 +27,10 @@ So You can mix attributes of a couple of controllers on a single element or elem
 ## Quick start
 
 ```ruby
-gem 'stimulus_tag_helper', github: 'crawler/stimulus_tag_helper'
+gem `stimulus_tag_helper`
 ```
 
-### In the rails Controller
+### In the Rails Controller
 
 ```ruby
 helper StimulusTagHelper
@@ -99,7 +99,7 @@ Became:
 
 ### Nested controllers
 
-Almost random peace of code from my app 
+Almost random peace of code from my app
 
 ```slim
 = stimulus_controller( \
