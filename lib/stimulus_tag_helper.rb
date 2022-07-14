@@ -5,25 +5,34 @@ require "zeitwerk"
 Zeitwerk::Loader.for_gem.setup
 
 module StimulusTagHelper
-  def self.base_properties
-    %i[controller values classes targets target actions].freeze
+  def self.properties
+    %i[controllers values classes targets actions].freeze
   end
 
   def self.aliases
-    {controller: :controllers, value: :values, class: :classes, target: :targets, action: :actions}.freeze
+    @aliases ||=
+      properties.map { |property| [property.to_s.singularize.to_sym, property] }.to_h.tap do |aliases|
+        aliases.dup.each { |key, value| aliases[value] = key }
+      end.freeze
   end
 
-  def self.methods_map
-    {controllers: :stimulus_controllers_property, values: :stimulus_values_properties,
-     classes: :stimulus_classes_properties, targets: :stimulus_targets_properties, actions: :stimulus_actions_property}.freeze
+  def self.all_possible_properties_names
+    @all_possible_properties_names ||= aliases.keys
   end
 
-  def self.alias_properties
-    @alias_properties ||= aliases.keys
+  def self.property_method_name_for(property)
+    property = aliases[property] if properties.exclude?(property)
+    "#{property}_#{rendered_as(property) == :one ? "property" : "properties"}"
   end
 
-  def self.property_names
-    @property_names ||= base_properties + alias_properties
+  def self.attribute_method_name_for(property)
+    property = aliases[property] if properties.exclude?(property)
+    "#{property}_#{rendered_as(property) == :one ? "attribute" : "attributes"}"
+  end
+
+  def self.rendered_as(property)
+    {controllers: :one, values: :many, classes: :many, targets: :many, actions: :one} \
+      [property] || raise(ArgumentError, "Unknown property: #{property.inspect}")
   end
 
   def self.prevent_duplicates(properties_set, name)
@@ -56,29 +65,28 @@ module StimulusTagHelper
     data.merge!(stimulus_properties(
       identifier,
       controller: data[:controller] || controller, # nil is allowed, because the args will be prepended by the identifier
-      **args.extract!(*StimulusTagHelper.property_names - %i[class])
+      **args.extract!(*StimulusTagHelper.all_possible_properties_names - %i[class])
     ))
     tag_builder.tag_string(tag, **args.merge(data: data), &block)
   end
 
-  # Does not includes the controller attribute
   def stimulus_attributes(...)
     {data: stimulus_properties(...)}
   end
 
   alias_method :stimulus_attribute, :stimulus_attributes
 
-  # Does not includes the controller property
   def stimulus_properties(identifier, **props)
+    props = props.symbolize_keys
     {}.tap do |data|
-      StimulusTagHelper.property_names.each do |name|
+      StimulusTagHelper.all_possible_properties_names.each do |name|
         next unless props.key?(name)
 
         args = Array.wrap(props[name]).unshift(identifier)
         kwargs = args.last.is_a?(Hash) ? args.pop : {}
         StimulusTagHelper.prevent_duplicates(props, name)
         data.merge!(
-          public_send(StimulusTagHelper.methods_map[StimulusTagHelper.aliases[name] || name], *args, **kwargs)
+          public_send("stimulus_#{StimulusTagHelper.property_method_name_for(name)}", *args, **kwargs)
         )
       end
     end
@@ -91,7 +99,7 @@ module StimulusTagHelper
   alias_method :stimulus_controller_attribute, :stimulus_controllers_attribute
 
   def stimulus_controllers_property(*identifiers)
-    {controller: Array.wrap(identifiers).compact.join(" ")}
+    {controller: identifiers.flatten.compact.uniq.join(" ")}
   end
 
   alias_method :stimulus_controller_property, :stimulus_controllers_property
@@ -142,11 +150,17 @@ module StimulusTagHelper
 
   def stimulus_actions_property(identifier, *actions_params)
     {
-      action: actions_params.map { |action_params| stimulus_action_value(identifier, action_params) }.join(" ").html_safe
+      action: actions_params.flatten.map { |action_params| stimulus_action_value(identifier, action_params) }.join(" ").html_safe
     }
   end
 
   alias_method :stimulus_action_property, :stimulus_actions_property
+
+  def stimulus_actions_attribute(...)
+    {data: stimulus_actions_property(...)}
+  end
+
+  alias_method :stimulus_action_attribute, :stimulus_actions_attribute
 
   def stimulus_action_value(identifier, args_or_string) # :nodoc:
     return StimulusAction.parse(args_or_string, identifier: identifier) if args_or_string.is_a?(String)

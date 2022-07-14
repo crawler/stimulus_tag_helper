@@ -2,25 +2,34 @@
 
 module StimulusTagHelper
   class StimulusControllerBuilder
+    class << self
+      delegate :properties, :aliases, :attribute_method_name_for, :property_method_name_for, to: StimulusTagHelper
+    end
+
     def initialize(identifier:, template:)
       @identifier = identifier
       @template = template
     end
 
-    StimulusTagHelper.property_names.each do |name|
-      name = name.to_s
-      attribute, property = name.pluralize == name ? %w[attributes properties] : %w[attribute property]
+    properties.each do |name|
+      attribute_method_name = attribute_method_name_for(name)
+      property_method_name = property_method_name_for(name)
+      alias_name = aliases[name]
 
       class_eval(<<-RUBY, __FILE__, __LINE__ + 1)
-        def #{name}_#{attribute}(...)         # def value_attribute(...)
-          { data: #{name}_#{property}(...) }  #   { data: value_property(...) }
-        end                                   # end
+        def #{name}(*args, **kwargs)                                                        # def values(*args, **kwargs)
+          @template.stimulus_#{attribute_method_name}(*args.unshift(@identifier), **kwargs) #   @template.stimulus_values_attributes(*args.unshift(@identifier), **kwargs)
+        end                                                                                 # end
 
-        alias #{name} #{name}_#{attribute} # alias value value_attribute
+        alias_method :#{alias_name}, :#{name}                                               # alias_method :value, :values
+        alias_method :#{attribute_method_name}, :#{name}                                    # alias_method :values_attributes, :values
+        alias_method :#{alias_name}_attribute, :#{name}                                     # alias_method :value_attribute, :values
 
-        def #{name}_#{property}(*args, **kwargs)                                        # def value_property(*args, **kwargs)
-          @template.stimulus_#{name}_#{property}(*args.unshift(@identifier), **kwargs)  #   stimulus_value_property(@identifier, *args, **kwargs)
-        end                                                                             # end
+        def #{property_method_name}(*args, **kwargs)                                        # def values_properties(*args, **kwargs)
+          @template.stimulus_#{property_method_name}(*args.unshift(@identifier), **kwargs)  #   @template.stimulus_values_properties(*args.unshift(@identifier), **kwargs)
+        end                                                                                 # end
+
+        alias_method :#{alias_name}_property, :#{property_method_name}                      # alias_method :value_property, :values_properties
       RUBY
     end
 
