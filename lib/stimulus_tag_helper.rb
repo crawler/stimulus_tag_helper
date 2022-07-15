@@ -44,16 +44,10 @@ module StimulusTagHelper
     STRING
   end
 
-  def stimulus_controller(identifier, tag: nil, **args, &block)
-    raise(ArgumentError, "Missing block") unless block
-
-    builder = StimulusControllerBuilder.new(identifier: identifier, template: self)
-
-    return capture(builder, &block) unless tag
-
-    stimulus_controller_tag(identifier, tag: tag, **args) do
-      capture(builder, &block)
-    end
+  def stimulus_controller(identifier, tag: nil, **options, &block)
+    builder = StimulusControllerBuilder.new(identifier: identifier, tag: tag, template: self, **options)
+    return builder unless block
+    builder.capture(&block)
   end
 
   # controller arg is used to add additional stimulus controllers to the element

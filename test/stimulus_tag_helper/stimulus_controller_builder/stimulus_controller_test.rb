@@ -13,7 +13,7 @@ module StimulusTagHelper
               target: "query", actions: ["focus->handleFocus", "complete", "blur->other-controller#searchLostFocus"]
             )
           ),
-          t.tag.button(type: "submit", **c.action("search")),
+          t.tag.button(type: "submit", **c.action("search")) { t.tag.span(data: c.properties(target: "spinner")) },
           t.tag.div(**c.target("results"))
         ])
       end
@@ -25,7 +25,9 @@ module StimulusTagHelper
         <form data-controller="search" data-search-url-value="/search" data-search-working-class="progress">
           <input type="text" placeholder="Search..." data-search-target="query"
              data-action="focus->search#handleFocus search#complete blur->other-controller#searchLostFocus">
-          <button type="submit" data-action="search#search"></button>
+          <button type="submit" data-action="search#search">
+            <span data-search-target="spinner"></span>
+          </button>
           <div data-search-target="results"></div>
         </form>
       HTML
