@@ -7,6 +7,7 @@ gem "minitest"
 gem "minitest-ci"
 gem "minitest-reporters"
 gem "rake"
+gem "nokogiri", ">= 1.13.7" # Somehow Gemfile.lock being updated with nokogiri 1.11.1 so i lock this here
 
 group :lint do
   gem "reek", require: false

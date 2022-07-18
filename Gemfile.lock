@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stimulus_tag_helper (0.3.0)
+    stimulus_tag_helper (0.3.1)
       activesupport (>= 6.0.0)
       rails (>= 6.0.0)
       zeitwerk (>= 2.5.0)
@@ -217,6 +217,7 @@ DEPENDENCIES
   minitest
   minitest-ci
   minitest-reporters
+  nokogiri (>= 1.13.7)
   overcommit
   parser (= 3.1.2)
   rake
@@ -228,4 +229,4 @@ DEPENDENCIES
   stimulus_tag_helper!
 
 BUNDLED WITH
-   2.3.17
+   2.3.18
