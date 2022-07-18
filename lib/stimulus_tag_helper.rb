@@ -87,7 +87,7 @@ module StimulusTagHelper
   end
 
   def stimulus_controllers_attribute(...)
-    {data: stimulus_controllers_properties(...)}
+    {data: stimulus_controllers_property(...)}
   end
 
   alias_method :stimulus_controller_attribute, :stimulus_controllers_attribute
