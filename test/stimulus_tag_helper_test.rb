@@ -12,10 +12,6 @@ class StimulusTagHelperTest < TestCase
      action: "click->next"}
   end
 
-  def expected_singular_attributes
-    {data: expected_singular_properties}
-  end
-
   def expected_singular_properties
     expected_controller_poperty
       .merge(expected_value_property)
