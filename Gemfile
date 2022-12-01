@@ -15,7 +15,7 @@ group :lint do
   gem "rubocop-performance", require: false
   gem "rubocop-minitest", require: false
   gem "slim_lint", require: false
-  gem "parser", "3.1.2", require: false # match dev ruby version need
+  gem "parser", "3.1.3.0", require: false # match dev ruby version need
 end
 
 group :really_development do
