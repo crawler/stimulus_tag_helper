@@ -169,7 +169,7 @@ GEM
       rainbow (>= 2.0, < 4.0)
     regexp_parser (2.7.0)
     rexml (3.2.5)
-    rubocop (1.32.0)
+    rubocop (1.33.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
@@ -193,8 +193,8 @@ GEM
     slim_lint (0.24.0)
       rubocop (>= 1.0, < 2.0)
       slim (>= 3.0, < 6.0)
-    standard (1.14.0)
-      rubocop (= 1.32.0)
+    standard (1.15.0)
+      rubocop (= 1.33.0)
       rubocop-performance (= 1.14.3)
     temple (0.10.0)
     thor (1.2.1)
@@ -224,7 +224,7 @@ DEPENDENCIES
   rubocop-minitest
   rubocop-performance
   slim_lint
-  standard (~> 1.14.0)
+  standard (>= 1.14.0)
   stimulus_tag_helper!
 
 BUNDLED WITH
