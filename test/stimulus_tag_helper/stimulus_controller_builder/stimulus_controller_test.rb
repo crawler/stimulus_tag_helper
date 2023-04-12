@@ -40,7 +40,7 @@ module StimulusTagHelper
     def any_possible_naming_controller
       t.stimulus_controller(
         "onomatet", tag: "div", targets: "me", classes: {working: "choosing-names"}, values: {this: "that"},
-        actions: "load@document->work"
+        actions: "load@document->work", outlet: {result: ".selector"}
       ) do |c|
         t.safe_join([
           t.tag.div(
@@ -72,14 +72,14 @@ module StimulusTagHelper
             )
           ) { "Who" }
         ])
-      end
+      end.gsub("</div>", "</div>\n").html_safe
     end
 
     def expected_any_possible_naming_controller_output
       # %r{^(\s{2})+} matches only even number of spaces, to be able to leave space between attrs
-      <<~HTML.split("\n").map { |str| str.sub(%r{^(\s{2})+}, "") }.join("")
+      <<~HTML.split("\n").map { |str| str.sub(%r{^(\s{2})+}, "") }.join("").gsub("</div>", "</div>\n")
         <div data-controller="onomatet" data-onomatet-this-value="that" data-onomatet-working-class="choosing-names"
-           data-onomatet-target="me" data-action="load@document->onomatet#work">
+           data-onomatet-target="me" data-action="load@document->onomatet#work" data-onomatet-result-outlet=".selector">
         <div data-onomatet-thought-value="everything valuable" data-onomatet-target="thing"
            data-action="onomatet#unknown">Thing</div>
         <div data-onomatet-thought-value="everything valuable" data-onomatet-target="thing"

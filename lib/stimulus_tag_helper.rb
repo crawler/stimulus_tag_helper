@@ -6,14 +6,17 @@ Zeitwerk::Loader.for_gem.setup
 
 module StimulusTagHelper
   def self.properties
-    %i[controllers values classes targets actions].freeze
+    %i[controllers values classes targets actions outlets].freeze
   end
 
   def self.aliases
-    @aliases ||=
-      properties.map { |property| [property.to_s.singularize.to_sym, property] }.to_h.tap do |aliases|
-        aliases.dup.each { |key, value| aliases[value] = key }
-      end.freeze
+    @aliases ||= {}.tap do |aliases|
+      properties.each do |property|
+        property_alias = property.to_s.singularize.to_sym
+        aliases[property] = property_alias
+        aliases[property_alias] = property
+      end
+    end.freeze
   end
 
   def self.all_possible_properties_names
@@ -31,7 +34,7 @@ module StimulusTagHelper
   end
 
   def self.rendered_as(property)
-    {controllers: :one, values: :many, classes: :many, targets: :many, actions: :one} \
+    {controllers: :one, values: :many, classes: :many, targets: :many, actions: :one, outlets: :many} \
       [property] || raise(ArgumentError, "Unknown property: #{property.inspect}")
   end
 
@@ -163,4 +166,20 @@ module StimulusTagHelper
     # TODO: find a elegant way to escape -> splitter escaping &gt; back and forth.
     StimulusAction.new(identifier: identifier, **args_or_string).to_s.html_safe
   end
+
+  def stimulus_outlets_attributes(...)
+    {data: stimulus_outlets_properties(...)}
+  end
+
+  alias_method :stimulus_outlet_attribute, :stimulus_outlets_attributes
+
+  def stimulus_outlets_properties(identifier, **outlets)
+    {}.tap do |properties|
+      outlets.each_pair do |name, selector|
+        properties["#{identifier}-#{name}-outlet"] = selector
+      end
+    end
+  end
+
+  alias_method :stimulus_outlet_property, :stimulus_outlets_properties
 end

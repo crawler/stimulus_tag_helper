@@ -9,7 +9,7 @@ class StimulusTagHelperTest < TestCase
 
   def singular_input
     {controller: "clipboard", value: {url: "/slides"}, class: {loading: "slide--loading"}, target: "slide",
-     action: "click->next"}
+     action: "click->next", outlet: {result: ".selector"}}
   end
 
   def expected_singular_properties
@@ -18,6 +18,7 @@ class StimulusTagHelperTest < TestCase
       .merge(expected_class_property)
       .merge(expected_target_property)
       .merge(expected_action_property)
+      .merge(expected_outlet_property)
   end
 
   def expected_controller_poperty
@@ -40,10 +41,14 @@ class StimulusTagHelperTest < TestCase
     {action: "click->clipboard#next"}
   end
 
+  def expected_outlet_property
+    {"clipboard-result-outlet" => ".selector"}
+  end
+
   def plural_input
     {controllers: %w[gallery clipboard], values: {url: "/slides", method: "put"},
      classes: {loading: "slide--loading", animating: "slide--animating"}, targets: %w[slide active],
-     actions: %w[next blur->prev]}
+     actions: %w[next blur->prev], outlets: {slides: ".slides", paginator: ".paginator"}}
   end
 
   def expected_plural_properties
@@ -52,6 +57,7 @@ class StimulusTagHelperTest < TestCase
       .merge(expected_classes_properties)
       .merge(expected_targets_properties)
       .merge(expected_actions_property)
+      .merge(expected_outlets_properties)
   end
 
   def expected_controllers_property
@@ -74,6 +80,10 @@ class StimulusTagHelperTest < TestCase
     {action: "gallery#next blur->gallery#prev"}
   end
 
+  def expected_outlets_properties
+    {"gallery-slides-outlet" => ".slides", "gallery-paginator-outlet" => ".paginator"}
+  end
+
   def test_stimulus_controllers_attribute
     assert_equal({data: expected_controller_poperty}, t.stimulus_controller_attribute(singular_input[:controller]))
     assert_equal({data: expected_controllers_property}, t.stimulus_controllers_attribute(*plural_input[:controllers]))
@@ -89,7 +99,7 @@ class StimulusTagHelperTest < TestCase
     assert_equal({data: expected_classes_properties}, t.stimulus_classes_attributes("gallery", **plural_input[:classes]))
   end
 
-  def test_stimulus_targets_properties
+  def test_stimulus_targets_attributes
     assert_equal({data: expected_target_property}, t.stimulus_target_attribute("clipboard", singular_input[:target]))
     assert_equal({data: expected_targets_properties}, t.stimulus_targets_attributes("gallery", *plural_input[:targets]))
   end
@@ -97,6 +107,11 @@ class StimulusTagHelperTest < TestCase
   def test_stimulus_actions_attribute
     assert_equal({data: expected_action_property}, t.stimulus_action_attribute("clipboard", singular_input[:action]))
     assert_equal({data: expected_actions_property}, t.stimulus_actions_attribute("gallery", *plural_input[:actions]))
+  end
+
+  def test_stimulus_outlets_attributes
+    assert_equal({data: expected_outlet_property}, t.stimulus_outlet_attribute("clipboard", **singular_input[:outlet]))
+    assert_equal({data: expected_outlets_properties}, t.stimulus_outlets_attributes("gallery", **plural_input[:outlets]))
   end
 
   def test_stimulus_attributes

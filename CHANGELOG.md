@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0
+
+* Add `outlet` selector attributes support
+
+```ruby
+  stimulus_controller_tag("clipboard", tag: :div, outlet: {items: ".items"})
+```
+## Becomes
+```html
+  <div data-controller="clipboard" data-clipboard-items-outlet=".items"></div>
+```
+
 ## 0.3.0
 
 * Add `StimulusControllerBuilder#capture` so builder can be created, stored and accessed outside block scope this can
