@@ -18,7 +18,9 @@ jobs:
         ruby: ['3.1', '3.2', '3.3']
         gemfile:
           [ Gemfile, gemfiles/rails-edge.gemfile, gemfiles/rails-prev.gemfile, gemfiles/rails-before-prev.gemfile ]
-    # runs-on: ${{ matrix.os }}
+        exclude:
+          - ruby: '3.1'
+            gemfile: gemfiles/rails-edge.gemfile
     env:
       BUNDLE_WITHOUT: "really_development:linting"
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
