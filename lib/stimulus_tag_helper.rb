@@ -5,6 +5,7 @@ require "zeitwerk"
 Zeitwerk::Loader.for_gem.setup
 
 module StimulusTagHelper
+  TAG_BUILDER_OPTIMIZED_VERION = Gem::Version.new("7.2.0")
   def self.properties
     %i[controllers values classes targets actions outlets].freeze
   end
@@ -64,7 +65,11 @@ module StimulusTagHelper
       controller: data[:controller] || controller, # nil is allowed, because the args will be prepended by the identifier
       **args.extract!(*StimulusTagHelper.all_possible_properties_names - %i[class])
     ))
-    tag_builder.tag_string(tag, **args.merge(data: data), &block)
+    if ActionView.version >= TAG_BUILDER_OPTIMIZED_VERION
+      tag_builder.tag_string(tag, nil, args.merge(data: data), &block)
+    else
+      tag_builder.tag_string(tag, **args.merge(data: data), &block)
+    end
   end
 
   def stimulus_attributes(...)
