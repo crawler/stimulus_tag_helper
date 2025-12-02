@@ -133,6 +133,19 @@ end
 </div>
 ```
 
+### Stimulus Values, CSS Classes & HTML Attributes
+
+**Slim Lang:**
+```slim
+= stimulus_controller("hello", tag: "div", class: "my-css-class", id: "my-id", values: {greeting: "hello"}) { }
+```
+
+**Output:**
+
+```html
+<div class="my-css-class" id="my-id" data-controller="hello" data-hello-greeting-value="world"></div>
+```
+
 ## Support
 
 If you want to report a bug or have ideas, feedback, or questions about the gem, [let me know via GitHub issues](https://github.com/crawler/stimulus_tag_helper/issues/new) and I will do my best to provide a helpful answer. Happy hacking!
